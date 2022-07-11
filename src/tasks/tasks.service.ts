@@ -13,20 +13,10 @@ export class TasksService {
     @InjectRepository(TasksRepository)
     private tasksRepository: TasksRepository,
   ) {}
-  // createTask(createTaskDto: CreateTaskDto) {
-  //   const { title, description } = createTaskDto;
-  //   const task: Task = {
-  //     id: uuid(),
-  //     title,
-  //     description,
-  //     status: TaskStatus.OPEN,
-  //   };
-  //   this.tasks.push(task);
-  //   return task;
-  // }
-  // getAllTasks(): Task[] {
-  //   return this.tasks;
-  // }
+
+  createTask(createTaskDto: CreateTaskDto): Promise<Task> {
+    return this.tasksRepository.createTask(createTaskDto);
+  }
 
   async getTaskById(id: Task['id']): Promise<Task> {
     const found = await this.tasksRepository.findOne(id);
@@ -36,32 +26,28 @@ export class TasksService {
     return found;
   }
 
-  // getTasksWithFilters(filterDto: GetTasksFilterDto): Task[] {
-  //   const { status, search } = filterDto;
-  //   let tasks = this.getAllTasks();
-  //   if (status) {
-  //     tasks = tasks.filter((task: Task) => task.status === status);
-  //   }
-  //   if (search) {
-  //     tasks = tasks.filter((tasks: Task) => {
-  //       return (
-  //         tasks.title.includes(search) || tasks.description.includes(search)
-  //       );
-  //     });
-  //   }
-  //   return tasks;
-  // }
-  // updateTaskById(id: Task['id'], updateTaskDto: UpdateTaskDto): Task | string {
-  //   const targetTask = this.getTaskById(id);
-  //   for (const index in updateTaskDto) {
-  //     const item = updateTaskDto[index];
-  //     targetTask[index] = item;
-  //   }
-  //   return targetTask;
-  // }
-  // deleteTaskById(id: Task['id']): string {
-  //   const found = this.getTaskById(id);
-  //   this.tasks.filter((task: Task) => task.id === found.id);
-  //   return `Task with id ${id} has been removed`;
-  // }
+  async getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
+    return this.tasksRepository.getTasks(filterDto);
+  }
+
+  async updateTaskById(
+    id: Task['id'],
+    updateTaskDto: UpdateTaskDto,
+  ): Promise<Task> {
+    let task = await this.getTaskById(id);
+    const { title, description, status } = updateTaskDto;
+    task = {
+      ...task,
+      title,
+      description,
+      status,
+    };
+    return task;
+  }
+  async deleteTaskById(id: Task['id']): Promise<void> {
+    const result = await this.tasksRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with id ${id} not found`);
+    }
+  }
 }
