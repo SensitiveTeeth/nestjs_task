@@ -30,7 +30,7 @@ import { configValidationSchema } from './config.schema';
           username: configService.get('DB_USERNAME'),
           password: configService.get('DB_PASSWORD'),
           port: configService.get('DB_PORT'),
-          database: configService.get('DB_USERNAME'),
+          database: configService.get('DB_DATABASE'),
         };
       },
     }),
